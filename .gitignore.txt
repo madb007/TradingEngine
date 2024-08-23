@@ -1,0 +1,7 @@
+## Visual Studio temporary files
+.vs/
+*.vsidx
+
+## .NET specific
+bin/
+obj/
