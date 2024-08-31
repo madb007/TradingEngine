@@ -1,8 +1,8 @@
-﻿namespace LoggingCS.LoggingConfiguration
+﻿namespace TradingEngineServer.Logging
 {
-    internal class LoggerConfiguration
+    public class LoggerConfiguration
     {
-        public LoggerType LoggerType { get; set; };
+        public LoggerType LoggerType { get; set; }
         //public ConsoleLoggerConfiguration ConsoleLoggerConfiguration {get; set };
         public TextLoggerConfiguration TextLoggerConfiguration {  get; set; }
     }
@@ -11,7 +11,7 @@
 
     }
 
-    class TextLoggerConfiguration
+    public class TextLoggerConfiguration
     {
         public string Directory { get; set; }
         public string Filename { get; set; }

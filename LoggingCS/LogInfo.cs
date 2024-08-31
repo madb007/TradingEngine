@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LoggingCS
+namespace TradingEngineServer.Logging
 {
-    internal class LogInfo
-    {
-    }
+    public record LogInfo(LoggingLevels logLevel, string module, string message, DateTime now, int threadID, string threadName);
 }

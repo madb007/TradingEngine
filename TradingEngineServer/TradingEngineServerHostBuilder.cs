@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using TradingEngineServer.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TradingEngineServer.Core.Configuration;
 
 namespace TradingEngineServer.Core
@@ -16,10 +12,11 @@ namespace TradingEngineServer.Core
                 //Begin with config 
                 services.AddOptions();
                 services.Configure<TradingEngineServerConfiguration>(context.Configuration.GetSection(nameof(TradingEngineServerConfiguration)));
+                services.Configure<LoggerConfiguration>(context.Configuration.GetSection(nameof(LoggerConfiguration)));
 
                 //Add singleton objects.
                 services.AddSingleton<ITradingEngineServer, TradingEngineServer>();
-
+                services.AddSingleton<ITextLogger,TextLogger>();
                 //Add hosted service.
                 services.AddHostedService<TradingEngineServer>();
             }).Build();
