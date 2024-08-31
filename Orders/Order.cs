@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradingEngineServer.Orders
 {
-    internal class Order : IOrderCore
+    public class Order : IOrderCore
     {
         public Order(IOrderCore orderCore, long price, uint quantity, bool isBuySide) {
             Price = price;
@@ -18,6 +18,9 @@ namespace TradingEngineServer.Orders
 
         }
 
+        public Order(ModifyOrder modifyOrder) : this(modifyOrder, modifyOrder.Price, modifyOrder.Quantity, modifyOrder.IsBuySide) 
+        {
+        }
         //PUBLIC PROPERTIES//
         public long Price { get; private set; }
         public uint InitialQuantity { get; private set; }

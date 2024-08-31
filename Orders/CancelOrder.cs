@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradingEngineServer.Orders
 {
-    internal class CancelOrder : IOrderCore
+    public class CancelOrder : IOrderCore
     {
         public CancelOrder(IOrderCore orderCore) 
         {
@@ -15,11 +15,11 @@ namespace TradingEngineServer.Orders
 
         // PROPERTIES //
 
-        public long OrderID => throw new NotImplementedException();
+        public long OrderID => _orderCore.OrderID;
 
-        public string Username => throw new NotImplementedException();
+        public string Username => _orderCore.Username;
 
-        public int SecurityID => throw new NotImplementedException();
+        public int SecurityID => _orderCore.SecurityID;
 
         // FIELDS //
 

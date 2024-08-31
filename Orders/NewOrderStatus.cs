@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradingEngineServer.Orders
 {
-    internal class NewOrderStatus
+    public class NewOrderStatus
     {
     }
 }

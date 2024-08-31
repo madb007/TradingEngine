@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TradingEngineServer.Orders
+namespace TradingEngineServer.Rejects
 {
-    internal class RejectionReason
+    public enum RejectionReason
     {
+        Unknown, 
+        OrderNotFound,
+        InstrumentNotFound,
+        AttemptingToModifySide
     }
 }
