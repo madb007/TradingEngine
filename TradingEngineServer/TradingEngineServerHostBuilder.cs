@@ -2,23 +2,52 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TradingEngineServer.Core.Configuration;
+using TradingEngineServer.Orderbook;
+using Microsoft.Extensions.Options;
 
 namespace TradingEngineServer.Core
 {
     public sealed class TradingEngineServerHostBuilder
     {
-        public static IHost BuildTradingEngineServer() => Host.CreateDefaultBuilder().ConfigureServices((context,services) =>
-            {
-                //Begin with config 
-                services.AddOptions();
-                services.Configure<TradingEngineServerConfiguration>(context.Configuration.GetSection(nameof(TradingEngineServerConfiguration)));
-                services.Configure<LoggerConfiguration>(context.Configuration.GetSection(nameof(LoggerConfiguration)));
+        public static IHost BuildTradingEngineServer(bool registerAsHostedService = true)
+        {
+            return Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    // Begin with config 
+                    services.AddOptions();
+                    services.Configure<TradingEngineServerConfiguration>(context.Configuration.GetSection(nameof(TradingEngineServerConfiguration)));
+                    services.Configure<LoggerConfiguration>(context.Configuration.GetSection(nameof(LoggerConfiguration)));
 
-                //Add singleton objects.
-                services.AddSingleton<ITradingEngineServer, TradingEngineServer>();
-                services.AddSingleton<ITextLogger,TextLogger>();
-                //Add hosted service.
-                services.AddHostedService<TradingEngineServer>();
-            }).Build();
+                    // Add singleton objects.
+                    services.AddSingleton<ITradingEngineServer, TradingEngineServer>();
+
+                    services.AddSingleton<ILogger>(serviceProvider =>
+                    {
+                        var loggerConfig = serviceProvider.GetRequiredService<IOptions<LoggerConfiguration>>().Value;
+
+                        switch (loggerConfig.LoggerType)
+                        {
+                            case LoggerType.Text:
+                                return new TextLogger(serviceProvider.GetRequiredService<IOptions<LoggerConfiguration>>());
+
+                            case LoggerType.Console:
+                                return new ConsoleLogger(serviceProvider.GetRequiredService<IOptions<LoggerConfiguration>>());
+
+                            default:
+                                throw new ArgumentException($"Unsupported logger type: {loggerConfig.LoggerType}");
+                        }
+                    });
+
+                    services.AddSingleton<IOrderbookManager, OrderbookManager>();
+
+                    // Add hosted service only if specified
+                    if (registerAsHostedService)
+                    {
+                        services.AddHostedService<TradingEngineServer>();
+                    }
+                })
+                .Build();
+        }
     }
 }

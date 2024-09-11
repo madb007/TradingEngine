@@ -104,7 +104,11 @@ namespace TradingEngineServer.Logging
 
         private static string FormatLogItem(LogInfo logItem)
         {
-            return $"[{logItem.now:yyyy-MM-dd HH:mm:ss.fffffff}] [{logItem.threadName,38}:{logItem.threadID:000}] [{logItem.logLevel}] {logItem.message}";
+            string threadInfo = string.IsNullOrEmpty(logItem.threadName)
+                ? $"{"Thread",25}:{logItem.threadID:000}]"
+                : $"{logItem.threadName,25}:{logItem.threadID:000}]";
+
+            return $"[{logItem.now:yyyy-MM-dd HH:mm:ss.fffffff}] [{threadInfo} [{logItem.logLevel}] {logItem.module}: {logItem.message}";
         }
 
         protected override void Log(LoggingLevels logLevel, string module, string message)

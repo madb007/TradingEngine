@@ -13,6 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orders", "..\Orders\Orders.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderBook", "..\OrderBook\OrderBook.csproj", "{0FF817AE-CC61-4A1B-9A60-9BE7A7F83116}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestOrderEntryOrderbook", "..\TestOrderEntryOrderbook\TestOrderEntryOrderbook.csproj", "{A6528004-31DC-4180-A027-7EE88CB6C831}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0FF817AE-CC61-4A1B-9A60-9BE7A7F83116} = {0FF817AE-CC61-4A1B-9A60-9BE7A7F83116}
+		{1AD54263-61B3-428F-AF0C-4176F5FBA742} = {1AD54263-61B3-428F-AF0C-4176F5FBA742}
+		{3471A5CE-08D2-415C-8B46-E6F37C9567EE} = {3471A5CE-08D2-415C-8B46-E6F37C9567EE}
+		{50D5DE36-8306-42B1-8A25-EA4E346F0CDB} = {50D5DE36-8306-42B1-8A25-EA4E346F0CDB}
+		{F35AF197-F0C1-4842-B0B9-5599262D3D0E} = {F35AF197-F0C1-4842-B0B9-5599262D3D0E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +48,10 @@ Global
 		{0FF817AE-CC61-4A1B-9A60-9BE7A7F83116}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FF817AE-CC61-4A1B-9A60-9BE7A7F83116}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FF817AE-CC61-4A1B-9A60-9BE7A7F83116}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6528004-31DC-4180-A027-7EE88CB6C831}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6528004-31DC-4180-A027-7EE88CB6C831}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6528004-31DC-4180-A027-7EE88CB6C831}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6528004-31DC-4180-A027-7EE88CB6C831}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,7 +3,7 @@
     public class LoggerConfiguration
     {
         public LoggerType LoggerType { get; set; }
-        //public ConsoleLoggerConfiguration ConsoleLoggerConfiguration {get; set };
+        public ConsoleLoggerConfiguration ConsoleLoggerConfiguration { get; set; }
         public TextLoggerConfiguration TextLoggerConfiguration {  get; set; }
     }
     public class ConsoleLoggerConfiguration

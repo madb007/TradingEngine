@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TradingEngineServer.Orders
 {
-    internal class OrderCore : IOrderCore
+    public class OrderCore : IOrderCore
     {
         public OrderCore(long orderID, string username, int securityID)
         {
