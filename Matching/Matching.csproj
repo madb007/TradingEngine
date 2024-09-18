@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <AssemblyName>TradingEngineServer.Matching</AssemblyName>
+	  <RootNamespace>TradingEngineServer.Matching</RootNamespace>
+	  <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orders\Orders.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,21 +6,83 @@ using System.Text;
 using System.Threading.Tasks;
 using TradingEngineServer.Orders;
 using TradingEngineServer.Instrument;
-using System.Reflection.Metadata.Ecma335;
+using TradingEngineServer.Matching;
+using TradingEngineServer.Rejects;
 
 namespace TradingEngineServer.Orderbook
 {
-    public class Orderbook : IRetrievalOrderbook
+    public class Orderbook : IMatchingOrderbook
     {
         //PRIVATE FIELDS//
         private readonly Security _instrument;
         private readonly Dictionary<long, OrderBookEntry> _orders = new Dictionary<long, OrderBookEntry>();
         private readonly SortedSet<Limit> _askLimits = new SortedSet<Limit>(AskLimitComparer.Comparer);
         private readonly SortedSet<Limit> _bidLimits = new SortedSet<Limit>(BidLimitComparer.Comparer);
-
-        public Orderbook(Security instrument)
+        private readonly Queue<Order> _orderQueue = new Queue<Order>();
+        private readonly IMatchingEngine _matchingEngine;
+        public Orderbook(Security instrument, IMatchingEngine matchingEngine)
         {
             _instrument = instrument;
+            _matchingEngine = matchingEngine;
+        }
+
+        public MatchResult Match()
+        {
+            var allTrades = new List<Trade>();
+            var allRejections = new List<Rejection>();
+
+            while (_orderQueue.Count > 0)
+            {
+                var order = _orderQueue.Dequeue();
+                var oppositeLimit = order.IsBuySide ? _askLimits.First() : _bidLimits.First();
+
+                if (oppositeLimit == null || !isMatchPossible(order, oppositeLimit))
+                {
+                    AddOrder(order);
+                    continue;
+                }
+
+                var matchResult = _matchingEngine.Match(order, oppositeLimit);
+
+                allTrades.AddRange(matchResult.Trades);
+                allRejections.AddRange(matchResult.Rejections);
+
+                UpdateOrderBook(matchResult.Trades);
+
+                if(matchResult.RemainingQuantity > 0)
+                {
+                    order.DecreaseQuantity(matchResult.RemainingQuantity);
+                    AddOrder(order);
+                }
+            }
+            return new MatchResult(allTrades, 0, allRejections);
+        }
+        
+        private bool isMatchPossible(Order order, Limit oppositeLimit)
+        {
+            return (order.IsBuySide && order.Price >= oppositeLimit.Price) ||
+                (!order.IsBuySide && order.Price <= oppositeLimit.Price);
+        }
+
+        private void UpdateOrderBook(List<Trade> trades)
+        {
+            foreach (var trade in trades)
+            {
+                UpdateOrderAfterTrade(trade.BuyOrder, trade.Quantity);
+                UpdateOrderAfterTrade(trade.SellOrder, trade.Quantity);
+            }
+        }
+
+        private void UpdateOrderAfterTrade(Order order, uint tradedQuantity)
+        {
+            if (_orders.TryGetValue(order.OrderID, out var bookEntry))
+            {
+                order.DecreaseQuantity(tradedQuantity);
+                if(order.CurrentQuantity == 0)
+                {
+                    RemoveOrder(new CancelOrder(order));
+                }
+            }
         }
 
         public int count => _orders.Count;
