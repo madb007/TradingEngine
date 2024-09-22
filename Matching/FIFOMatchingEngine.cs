@@ -11,6 +11,10 @@ namespace TradingEngineServer.Matching
     {
         public MatchResult Match(Order incomingOrder, Limit bestOppositeLimit)
         {
+            if(incomingOrder.CurrentQuantity == 0 || bestOppositeLimit == null || bestOppositeLimit.Head == null)
+            {
+                return new MatchResult(new List<Trade>(), incomingOrder.CurrentQuantity);
+            }
             var trades = new List<Trade>();
             var remainingQuantity = incomingOrder.CurrentQuantity;
 
@@ -37,7 +41,7 @@ namespace TradingEngineServer.Matching
                 currentEntry = currentEntry.Next;
             }
 
-            return  new MatchResult(trades, (uint)remainingQuantity);
+            return  new MatchResult(trades, remainingQuantity);
         }
 
         private bool isMatchPossible(Order incomingOrder, Order oppositeOrder)

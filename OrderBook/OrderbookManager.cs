@@ -1,18 +1,19 @@
 ﻿using System.Collections.Concurrent;
 using TradingEngineServer.Instrument;
+using TradingEngineServer.Matching;
 
 namespace TradingEngineServer.Orderbook
 {
     public class OrderbookManager : IOrderbookManager
     {
-        private readonly ConcurrentDictionary<Security, IRetrievalOrderbook> _orderbooks = new ConcurrentDictionary<Security, IRetrievalOrderbook>();
+        private readonly ConcurrentDictionary<Security, IMatchingOrderbook> _orderbooks = new ConcurrentDictionary<Security, IMatchingOrderbook>();
 
         public Security[] GetSecurities()
         {
             return _orderbooks.Keys.ToArray();
         }
 
-        public IRetrievalOrderbook GetOrderbook(Security security)
+        public IMatchingOrderbook GetOrderbook(Security security)
         {
             if (_orderbooks.TryGetValue(security, out var orderbook))
             {
@@ -21,12 +22,12 @@ namespace TradingEngineServer.Orderbook
             throw new KeyNotFoundException($"Orderbook for security ID {security.Id} not found.");
         }
 
-        public void CreateOrderbook(Security security)
+        public void CreateOrderbook(Security security, IMatchingEngine matchingEngine)
         {
-            _orderbooks.TryAdd(security, new Orderbook(security));
+            _orderbooks.TryAdd(security, new Orderbook(security, matchingEngine));
         }
 
-        public bool TryGetOrderbook(Security security, out IRetrievalOrderbook orderbook)
+        public bool TryGetOrderbook(Security security, out IMatchingOrderbook orderbook)
         {
             return _orderbooks.TryGetValue(security, out orderbook);
         }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using TradingEngineServer.Core.Configuration;
 using TradingEngineServer.Orderbook;
 using Microsoft.Extensions.Options;
+using TradingEngineServer.Matching;
 
 namespace TradingEngineServer.Core
 {
@@ -18,6 +19,7 @@ namespace TradingEngineServer.Core
                     services.AddOptions();
                     services.Configure<TradingEngineServerConfiguration>(context.Configuration.GetSection(nameof(TradingEngineServerConfiguration)));
                     services.Configure<LoggerConfiguration>(context.Configuration.GetSection(nameof(LoggerConfiguration)));
+                    services.Configure<MatchingConfiguration>(context.Configuration.GetSection(nameof(MatchingConfiguration)));
 
                     // Add singleton objects.
                     services.AddSingleton<ITradingEngineServer, TradingEngineServer>();
@@ -41,6 +43,16 @@ namespace TradingEngineServer.Core
 
                     services.AddSingleton<IOrderbookManager, OrderbookManager>();
 
+                    services.AddSingleton<IMatchingEngine>(serviceProvider =>
+                    {
+                        var config = serviceProvider.GetRequiredService<IOptions<MatchingConfiguration>>().Value;
+                        return config.MatchingType switch
+                        {
+                            MatchingType.FIFO => new FIFOMatchingEngine(),
+                            MatchingType.ProRata => new ProRataMatchingEngine(),
+                            _ => throw new ArgumentException($"Unsupported matching engine type: {config.MatchingType}")
+                        };
+                    });
                     // Add hosted service only if specified
                     if (registerAsHostedService)
                     {

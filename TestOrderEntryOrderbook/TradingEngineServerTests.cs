@@ -7,6 +7,7 @@ using TradingEngineServer.Logging;
 using TradingEngineServer.Orderbook;
 using TradingEngineServer.Orders;
 using TradingEngineServer.Instrument;
+using TradingEngineServer.Matching;
 using Xunit;
 using System.Threading;
 
@@ -20,6 +21,7 @@ namespace TradingEngineServer.Tests
         private IOrderbookManager _orderbookManager;
         private ILogger _logger;
         private CancellationTokenSource _cts;
+        private IMatchingEngine _matchingEngine;
 
         public async Task InitializeAsync()
         {
@@ -31,10 +33,10 @@ namespace TradingEngineServer.Tests
                 _orderbookManager = _serviceProvider.GetRequiredService<IOrderbookManager>();
                 _tradingEngine = _serviceProvider.GetRequiredService<ITradingEngineServer>();
                 _logger = _serviceProvider.GetRequiredService<ILogger>();
+                _matchingEngine = _serviceProvider.GetRequiredService<IMatchingEngine>();
 
                 _logger.Info("InitializeAsync", "Initialization started");
 
-                // Start the TradingEngineServer in the background
                 _cts = new CancellationTokenSource();
                 var tradingEngineTask = Task.Run(async () =>
                 {
@@ -42,10 +44,10 @@ namespace TradingEngineServer.Tests
                 });
 
                 var security = new Security(1, "AAPL");
-                _tradingEngine.AddSecurity(security);
+                _tradingEngine.AddSecurity(security, _matchingEngine);
 
                 _logger.Info("InitializeAsync", "Security added, waiting for processing");
-                //await Task.Delay(1000);
+                await Task.Delay(1000);
                 _logger.Info("InitializeAsync", "Initialization completed");
             }
             catch (Exception ex)
@@ -75,13 +77,10 @@ namespace TradingEngineServer.Tests
         }
 
         [Fact]
-        public async Task TestOrderbookIntegration()
+        public async Task TestOrderbookIntegrationWithMatching()
         {
             // Arrange
             var security = new Security(1, "AAPL");
-
-            // Wait for the TradingEngineServer to process the security
-            //await Task.Delay(6000); // Wait for at least one LogAllOrderBookStates cycle
 
             // Verify that the orderbook was created
             Assert.True(_orderbookManager.TryGetOrderbook(security, out var orderbook), "Orderbook should have been created");
@@ -95,8 +94,11 @@ namespace TradingEngineServer.Tests
             orderbook.AddOrder(buyOrder);
             orderbook.AddOrder(sellOrder);
 
-            // Wait for the TradingEngineServer to process the orders
-            await Task.Delay(5000); // Wait for at least one more LogAllOrderBookStates cycle
+            // Perform matching
+            var matchResult = orderbook.Match();
+
+            // Wait for the TradingEngineServer to process the orders and matching
+            await Task.Delay(5000);
 
             // Assert
             var spread = orderbook.GetSpread();
@@ -112,6 +114,37 @@ namespace TradingEngineServer.Tests
             Assert.Single(askOrders);
             Assert.Equal(buyOrder.OrderID, bidOrders[0].CurrentOrder.OrderID);
             Assert.Equal(sellOrder.OrderID, askOrders[0].CurrentOrder.OrderID);
+
+            // Assert matching results
+            Assert.Empty(matchResult.Trades); // No trades should occur as the prices don't match
+            Assert.Empty(matchResult.Rejections);
+
+            // Add a matching order
+            var matchingBuyOrderCore = new OrderCore(3, "user3", security.Id);
+            var matchingBuyOrder = new Order(matchingBuyOrderCore, 15100, 50, true);
+            orderbook.AddOrder(matchingBuyOrder);
+
+            // Perform matching again
+            matchResult = orderbook.Match();
+            await Task.Delay(5000);
+
+            // Assert matching results
+            Assert.Single(matchResult.Trades);
+            Assert.Equal(50, (decimal)matchResult.Trades[0].Quantity);
+            Assert.Equal(15100, matchResult.Trades[0].Price);
+            Assert.Empty(matchResult.Rejections);
+
+            // Check updated orderbook state
+            spread = orderbook.GetSpread();
+            Assert.Equal(15000, spread.Bid);
+            Assert.Equal(15100, spread.Ask);
+
+            bidOrders = orderbook.GetBidOrders();
+            askOrders = orderbook.GetAskOrders();
+
+            Assert.Equal(2, bidOrders.Count);
+            Assert.Single(askOrders);
+            Assert.Equal(50, (decimal)askOrders[0].CurrentOrder.CurrentQuantity);
         }
     }
 }

@@ -12,18 +12,27 @@ namespace TradingEngineServer.Matching
     {
         public MatchResult Match(Order incomingOrder, Limit bestOppositeLimit)
         {
+            if (incomingOrder.CurrentQuantity == 0 || bestOppositeLimit == null || bestOppositeLimit.Head == null)
+            {
+                return new MatchResult(new List<Trade>(), incomingOrder.CurrentQuantity);
+            }
+
             var trades = new List<Trade>();
             var remainingQuantity = incomingOrder.CurrentQuantity;
+            ulong oppositeQuantity = bestOppositeLimit.getLevelOrderQuantity();
+            if(oppositeQuantity == 0)
+            { 
+                return new MatchResult(trades, remainingQuantity);
+            }
 
-            var oppositeQuantity = bestOppositeLimit.getLevelOrderQuantity();
             var currentEntry = bestOppositeLimit.Head;
 
             while (currentEntry != null && remainingQuantity > 0)
             {
                 if(isMatchPossible(incomingOrder,currentEntry.CurrentOrder))
                 {
-                    var ratio = (decimal)currentEntry.CurrentOrder.CurrentQuantity / oppositeQuantity;
-                    var matchQuantity = (uint)Math.Min(remainingQuantity, Math.Floor(incomingOrder.CurrentQuantity * ratio));
+                    decimal ratio = (decimal)currentEntry.CurrentOrder.CurrentQuantity / oppositeQuantity;
+                    uint matchQuantity = (uint)Math.Min(remainingQuantity, Math.Floor(incomingOrder.CurrentQuantity * ratio));
 
                     if (matchQuantity > 0)
                     {

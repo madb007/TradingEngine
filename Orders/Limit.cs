@@ -32,9 +32,9 @@ namespace TradingEngineServer.Orders
             return orderCount;
         }
 
-        public uint getLevelOrderQuantity()
+        public ulong getLevelOrderQuantity()
         {
-            uint orderQuantity = 0;
+            ulong orderQuantity = 0;
             OrderBookEntry dummyPointer = Head;
             while (dummyPointer != null)
             {

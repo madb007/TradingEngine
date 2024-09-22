@@ -5,6 +5,7 @@ using TradingEngineServer.Core.Configuration;
 using TradingEngineServer.Orderbook;
 using TradingEngineServer.Instrument;
 using System.Collections.Concurrent;
+using TradingEngineServer.Matching;
 namespace TradingEngineServer.Core
 {
     internal sealed class TradingEngineServer : BackgroundService, ITradingEngineServer
@@ -50,9 +51,9 @@ namespace TradingEngineServer.Core
             return base.StopAsync(cancellationToken);
         }
 
-        public void AddSecurity(Security security)
+        public void AddSecurity(Security security, IMatchingEngine matchingEngine)
         {
-            _orderbookManager.CreateOrderbook(security);
+            _orderbookManager.CreateOrderbook(security, matchingEngine);
             _logger.Info(nameof(TradingEngineServer), $"Added security: {security.Name} (ID: {security.Id})");
         }
 
