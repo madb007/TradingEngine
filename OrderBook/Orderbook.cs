@@ -30,9 +30,10 @@ namespace TradingEngineServer.Orderbook
         {
             var allTrades = new List<Trade>();
             var allRejections = new List<Rejection>();
-
+            Console.WriteLine("here1");
             while (_orderQueue.Count > 0)
             {
+                Console.WriteLine("here");
                 var order = _orderQueue.Dequeue();
                 var oppositeLimit = order.IsBuySide ? _askLimits.First() : _bidLimits.First();
 
