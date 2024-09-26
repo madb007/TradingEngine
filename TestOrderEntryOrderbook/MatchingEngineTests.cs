@@ -167,7 +167,7 @@ namespace TradingEngineServer.Tests
             var buyOrder = CreateOrder(1, 100, uint.MaxValue-1, true);
             var sellOrder = CreateOrder(2, 100, uint.MaxValue-1, false);
             var limit = CreateLimitWithOrders(sellOrder);
-            Console.WriteLine($"Limit Quantity after creation: {limit.getLevelOrderQuantity()}");
+            //Console.WriteLine($"Limit Quantity after creation: {limit.getLevelOrderQuantity()}");
 
 
             var fifoResult = _fifoEngine.Match(buyOrder, limit);
@@ -202,7 +202,7 @@ namespace TradingEngineServer.Tests
                 var entry = new OrderBookEntry(order, limit);
                 if (previous == null)
                 {
-                    Console.WriteLine(entry.CurrentOrder.CurrentQuantity);
+                    //Console.WriteLine(entry.CurrentOrder.CurrentQuantity);
                     limit.Head = entry;
                 }
                 else

@@ -8,6 +8,7 @@ using TradingEngineServer.Orders;
 using TradingEngineServer.Instrument;
 using TradingEngineServer.Matching;
 using TradingEngineServer.Rejects;
+using System.Runtime.InteropServices;
 
 namespace TradingEngineServer.Orderbook
 {
@@ -30,19 +31,20 @@ namespace TradingEngineServer.Orderbook
         {
             var allTrades = new List<Trade>();
             var allRejections = new List<Rejection>();
-            Console.WriteLine("here1");
+      
             while (_orderQueue.Count > 0)
             {
-                Console.WriteLine("here");
                 var order = _orderQueue.Dequeue();
-                var oppositeLimit = order.IsBuySide ? _askLimits.First() : _bidLimits.First();
-
+                var oppositeLimit = order.IsBuySide ? _askLimits.FirstOrDefault() : _bidLimits.FirstOrDefault();
+                
                 if (oppositeLimit == null || !isMatchPossible(order, oppositeLimit))
                 {
-                    AddOrder(order);
+                    AddOrderToBook(order);
                     continue;
                 }
 
+                Console.WriteLine("matched");
+                Console.WriteLine(_matchingEngine.GetType().Name);
                 var matchResult = _matchingEngine.Match(order, oppositeLimit);
 
                 allTrades.AddRange(matchResult.Trades);
@@ -53,7 +55,7 @@ namespace TradingEngineServer.Orderbook
                 if(matchResult.RemainingQuantity > 0)
                 {
                     order.DecreaseQuantity(matchResult.RemainingQuantity);
-                    AddOrder(order);
+                    AddOrderToBook(order);
                 }
             }
             return new MatchResult(allTrades, 0, allRejections);
@@ -90,12 +92,18 @@ namespace TradingEngineServer.Orderbook
 
         public void AddOrder(Order order)
         {
-            var baseLimit = new Limit(order.Price);
-            AddOrder(order, baseLimit, order.IsBuySide ? _bidLimits : _askLimits, _orders);
+            _orderQueue.Enqueue(order);
         }
 
-        private static void AddOrder(Order order, Limit baseLimit, SortedSet<Limit> limitLevels, Dictionary<long,OrderBookEntry> internalBook)
+        private void AddOrderToBook(Order order)
         {
+            var baseLimit = new Limit(order.Price);
+            AddOrderToBookInternal(order, baseLimit, order.IsBuySide ? _bidLimits : _askLimits, _orders);
+        }
+
+        private static void AddOrderToBookInternal(Order order, Limit baseLimit, SortedSet<Limit> limitLevels, Dictionary<long,OrderBookEntry> internalBook)
+        {
+            
             if (limitLevels.TryGetValue(baseLimit, out Limit limit))
             {
                 OrderBookEntry orderBookEntry = new OrderBookEntry(order, baseLimit);
@@ -129,7 +137,7 @@ namespace TradingEngineServer.Orderbook
             if(_orders.TryGetValue(modifyOrder.OrderID, out OrderBookEntry orderBookEntry))
             {
                 RemoveOrder(modifyOrder.ToCancelOrder());
-                AddOrder(modifyOrder.ToNewOrder(), orderBookEntry.ParentLimit, modifyOrder.IsBuySide ? _bidLimits : _askLimits, _orders);
+                AddOrder(modifyOrder.ToNewOrder());
             }
         }
 

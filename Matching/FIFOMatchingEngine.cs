@@ -11,13 +11,14 @@ namespace TradingEngineServer.Matching
     {
         public MatchResult Match(Order incomingOrder, Limit bestOppositeLimit)
         {
+            Console.WriteLine("here");
             if(incomingOrder.CurrentQuantity == 0 || bestOppositeLimit == null || bestOppositeLimit.Head == null)
             {
                 return new MatchResult(new List<Trade>(), incomingOrder.CurrentQuantity);
             }
+
             var trades = new List<Trade>();
             var remainingQuantity = incomingOrder.CurrentQuantity;
-
             var currentEntry = bestOppositeLimit.Head;
 
             while (currentEntry != null && remainingQuantity > 0)
