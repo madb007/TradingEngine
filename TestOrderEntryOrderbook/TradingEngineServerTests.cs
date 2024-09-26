@@ -142,7 +142,7 @@ namespace TradingEngineServer.Tests
             bidOrders = orderbook.GetBidOrders();
             askOrders = orderbook.GetAskOrders();
 
-            Assert.Equal(2, bidOrders.Count);
+            Assert.Single(bidOrders);
             Assert.Single(askOrders);
             Assert.Equal(50, (decimal)askOrders[0].CurrentOrder.CurrentQuantity);
         }

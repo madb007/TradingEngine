@@ -9,6 +9,7 @@ using TradingEngineServer.Instrument;
 using TradingEngineServer.Matching;
 using TradingEngineServer.Rejects;
 using System.Runtime.InteropServices;
+using System.ComponentModel.Design;
 
 namespace TradingEngineServer.Orderbook
 {
@@ -43,10 +44,9 @@ namespace TradingEngineServer.Orderbook
                     continue;
                 }
 
-                Console.WriteLine("matched");
-                Console.WriteLine(_matchingEngine.GetType().Name);
+               
                 var matchResult = _matchingEngine.Match(order, oppositeLimit);
-
+                Console.WriteLine(order.CurrentQuantity);
                 allTrades.AddRange(matchResult.Trades);
                 allRejections.AddRange(matchResult.Rejections);
 
@@ -57,10 +57,27 @@ namespace TradingEngineServer.Orderbook
                     order.DecreaseQuantity(matchResult.RemainingQuantity);
                     AddOrderToBook(order);
                 }
+
             }
             return new MatchResult(allTrades, 0, allRejections);
         }
-        
+
+        //useful for debugging
+        private void PrintOrderBookState()
+        {
+            Console.WriteLine("Current Order Book State:");
+            Console.WriteLine("Ask Orders:");
+            foreach (var order in GetAskOrders())
+            {
+                Console.WriteLine($"  ID: {order.CurrentOrder.OrderID}, Price: {order.CurrentOrder.Price}, Quantity: {order.CurrentOrder.CurrentQuantity}");
+            }
+            Console.WriteLine("Bid Orders:");
+            foreach (var order in GetBidOrders())
+            {
+                Console.WriteLine($"  ID: {order.CurrentOrder.OrderID}, Price: {order.CurrentOrder.Price}, Quantity: {order.CurrentOrder.CurrentQuantity}");
+            }
+        }
+
         private bool isMatchPossible(Order order, Limit oppositeLimit)
         {
             return (order.IsBuySide && order.Price >= oppositeLimit.Price) ||
@@ -72,7 +89,9 @@ namespace TradingEngineServer.Orderbook
             foreach (var trade in trades)
             {
                 UpdateOrderAfterTrade(trade.BuyOrder, trade.Quantity);
+                PrintOrderBookState();
                 UpdateOrderAfterTrade(trade.SellOrder, trade.Quantity);
+                PrintOrderBookState();
             }
         }
 
@@ -80,7 +99,8 @@ namespace TradingEngineServer.Orderbook
         {
             if (_orders.TryGetValue(order.OrderID, out var bookEntry))
             {
-                order.DecreaseQuantity(tradedQuantity);
+                //Would be necessary if we didn't reduce quantity in each Matching Engine individually
+                //order.DecreaseQuantity(tradedQuantity);
                 if(order.CurrentQuantity == 0)
                 {
                     RemoveOrder(new CancelOrder(order));

@@ -46,7 +46,7 @@ namespace TradingEngineServer.Core
                     services.AddSingleton<IMatchingEngine>(serviceProvider =>
                     {
                         var config = serviceProvider.GetRequiredService<IOptions<MatchingConfiguration>>().Value;
-                        Console.WriteLine(config.MatchingType);
+
                         return config.MatchingType switch
                         {
                             MatchingType.FIFO => new FIFOMatchingEngine(),
