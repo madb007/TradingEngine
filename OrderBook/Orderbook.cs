@@ -62,7 +62,7 @@ namespace TradingEngineServer.Orderbook
             return new MatchResult(allTrades, 0, allRejections);
         }
 
-        //useful for debugging
+        //Debugging Function
         private void PrintOrderBookState()
         {
             Console.WriteLine("Current Order Book State:");
@@ -89,9 +89,7 @@ namespace TradingEngineServer.Orderbook
             foreach (var trade in trades)
             {
                 UpdateOrderAfterTrade(trade.BuyOrder, trade.Quantity);
-                PrintOrderBookState();
                 UpdateOrderAfterTrade(trade.SellOrder, trade.Quantity);
-                PrintOrderBookState();
             }
         }
 
